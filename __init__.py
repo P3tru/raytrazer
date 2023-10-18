@@ -20,7 +20,7 @@ class Vector2:
     x: float
     y: float
 
-    def __add__(self, other):
+    def __add__(self, other) -> 'Vector2':
         """
         Adds this vector to another vector.
 
@@ -37,7 +37,7 @@ class Vector2:
             return Vector2(self.x + other.x, self.y + other.y)
         raise TypeError("Unsupported operand type for +")
 
-    def __sub__(self, other):
+    def __sub__(self, other) -> 'Vector2':
         """
         Subtracts another vector from this vector.
 
@@ -54,7 +54,7 @@ class Vector2:
             return Vector2(self.x - other.x, self.y - other.y)
         raise TypeError("Unsupported operand type for -")
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> 'Vector2':
         """
         Multiplies this vector by a scalar value or another vector.
 
@@ -71,7 +71,7 @@ class Vector2:
             return Vector2(self.x * other, self.y * other)
         raise TypeError("Unsupported operand type for *")
 
-    def __rmul__(self, other):
+    def __rmul__(self, other) -> 'Vector2':
         """
         Multiplies this vector by a scalar value from the right side.
 
@@ -86,7 +86,79 @@ class Vector2:
         """
         return self.__mul__(other)
 
-    def __getitem__(self, index):
+    def __truediv__(self, other) -> 'Vector2':
+        """
+        Divides this vector by a scalar value.
+
+        Args:
+            other (Union[int, float]): The scalar value to be divided.
+
+        Returns:
+            Vector2: The resulting vector after division.
+
+        Raises:
+            TypeError: If the operand type for division is not supported.
+        """
+        if isinstance(other, (int, float)):
+            return Vector2(self.x / other, self.y / other)
+        raise TypeError("Unsupported operand type for /")
+
+    def __neg__(self) -> 'Vector2':
+        """
+        Negates this vector.
+
+        Returns:
+            Vector2: The negated vector.
+        """
+        return Vector2(-self.x, -self.y)
+
+    def __abs__(self) -> float:
+        """
+        Computes the magnitude of this vector.
+
+        Returns:
+            float: The magnitude of this vector.
+        """
+        return sqrt(self.x ** 2 + self.y ** 2)
+
+    @property
+    def mag(self) -> float:
+        """
+        Computes the magnitude of this vector.
+
+        Returns:
+            float: The magnitude of this vector.
+        """
+        return abs(self)
+
+    @property
+    def mag2(self) -> float:
+        """
+        Computes the squared magnitude of this vector.
+
+        Returns:
+            float: The squared magnitude of this vector.
+        """
+        return self.x ** 2 + self.y ** 2
+
+    def __eq__(self, other) -> bool:
+        """
+        Checks if this vector is equal to another vector.
+
+        Args:
+            other (Vector2): The vector to be compared.
+
+        Returns:
+            bool: True if the vectors are equal, False otherwise.
+
+        Raises:
+            TypeError: If the operand type for equality is not supported.
+        """
+        if isinstance(other, Vector2):
+            return isclose(self.x, other.x) and isclose(self.y, other.y)
+        raise TypeError("Unsupported operand type for ==")
+
+    def __getitem__(self, index) -> float:
         """
         Accesses the vector coordinates using square brackets.
 
@@ -105,7 +177,7 @@ class Vector2:
             return self.y
         raise IndexError("Vector index out of range")
 
-    def __iter__(self):
+    def __iter__(self) -> float:
         """
         Iterates over the vector coordinates.
 
@@ -115,7 +187,7 @@ class Vector2:
         yield self.x
         yield self.y
 
-    def normalize(self):
+    def normalize(self) -> 'Vector2':
         """
         Computes the unit vector in the same direction as this vector.
 
@@ -125,12 +197,12 @@ class Vector2:
         Raises:
             ZeroDivisionError: If the vector has zero magnitude (cannot be normalized).
         """
-        magnitude = sqrt(self.x ** 2 + self.y ** 2)
+        magnitude = abs(self)
         if magnitude != 0:
             return Vector2(self.x / magnitude, self.y / magnitude)
         raise ZeroDivisionError("Cannot normalize a zero-length vector")
 
-    def dot(self, other):
+    def dot(self, other) -> float:
         """
         Computes the dot product between this vector and another vector.
 
@@ -147,7 +219,7 @@ class Vector2:
             return self.x * other.x + self.y * other.y
         raise TypeError("Unsupported operand type for dot product")
 
-    def cross(self, other):
+    def cross(self, other) -> float:
         """
         Computes the cross product between this vector and another vector.
 
@@ -164,8 +236,19 @@ class Vector2:
             return self.x * other.y - self.y * other.x
         raise TypeError("Unsupported operand type for cross product")
 
+    @property
+    def normal(self) -> 'Vector2':
+        """
+        Computes the normal vector to this vector.
+
+        Returns:
+            Vector2: The normalized normal vector.
+        """
+        return Vector2(-self.y, self.x).normalize()
+
 
 Vec2 = Vector2
+Point2 = Vector2
 
 
 @dataclass
@@ -195,7 +278,7 @@ class Ray:
         """
         return self.mom
 
-    def set(self, _pos: Vec2, _mom: Vec2):
+    def set(self, _pos: Vec2, _mom: Vec2) -> None:
         """
         Sets the position and momentum vectors of the ray.
 
@@ -206,7 +289,7 @@ class Ray:
         self.pos = _pos
         self.mom = _mom
 
-    def line(self, _x: float):
+    def line(self, _x: float) -> float:
         """
         Computes the y-coordinate on the ray's line at a given x-coordinate.
 
@@ -218,7 +301,7 @@ class Ray:
         """
         return self.pos.y + (_x - self.pos.x) / self.mom.x * self.mom.y
 
-    def move(self, _dt: float):
+    def move(self, _dt: float) -> None:
         """
         Moves the ray's position along its momentum vector.
 
@@ -227,7 +310,19 @@ class Ray:
         """
         self.pos += self.mom * _dt
 
-    def reflect(self, _n: Vec2):
+    def at(self, _dt: float) -> Vec2:
+        """
+        Computes the ray's position after moving along its momentum vector.
+
+        Args:
+            _dt (float): The time interval to move the ray.
+
+        Returns:
+            Vec2: The ray's position after moving along its momentum vector.
+        """
+        return self.pos + self.mom * _dt
+
+    def reflect(self, _n: Vec2) -> None:
         """
         Reflects the ray's momentum vector based on the given normal vector.
 
@@ -236,7 +331,7 @@ class Ray:
         """
         self.mom = self.mom - 2 * self.mom.dot(_n) * _n
 
-    def get_reflected(self, _n: Vec2):
+    def get_reflected(self, _n: Vec2) -> Vec2:
         """
         Calculates the reflected momentum vector based on the given normal vector.
 
